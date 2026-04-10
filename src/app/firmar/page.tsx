@@ -88,9 +88,16 @@ export default function FirmarPage() {
   return (
     <main className="mx-auto max-w-xl px-6 py-16">
       <div className="mb-8">
-        <a href="/" className="text-xs text-slate-400 hover:text-slate-600 transition-colors">
-          ← Volver
-        </a>
+        <div className="flex items-center justify-between">
+          <a href="/" className="text-xs text-slate-400 hover:text-slate-600 transition-colors">
+            ← Volver
+          </a>
+          <form action="/api/logout" method="POST">
+            <button type="submit" className="text-xs text-slate-400 hover:text-slate-600 transition-colors">
+              Cerrar sesión
+            </button>
+          </form>
+        </div>
         <h1 className="mt-4 text-2xl font-bold tracking-tight text-slate-900">Firmar documento</h1>
         <p className="mt-2 text-sm text-slate-500">
           Sesión activa. Subí un PDF y firmalo con tu certificado Lakaut.
