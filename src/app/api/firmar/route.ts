@@ -18,6 +18,12 @@ export async function POST(req: NextRequest) {
     body: formData,
   });
 
+  if (res.status === 401) {
+    const cookieStore = cookies();
+    cookieStore.delete("lakaut_token");
+    return Response.json({ message: "Sesión expirada" }, { status: 401 });
+  }
+
   if (!res.ok) {
     const contentType = res.headers.get("content-type") ?? "";
     if (contentType.includes("application/json")) {

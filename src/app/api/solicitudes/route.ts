@@ -13,6 +13,11 @@ export async function GET() {
     headers: { Cookie: `legacy_solicitudes_access_token=${token}` },
   });
 
+  if (res.status === 401) {
+    cookies().delete("lakaut_token");
+    return Response.json({ error: "Sesión expirada" }, { status: 401 });
+  }
+
   const data = await res.json();
   return Response.json(data, { status: res.status });
 }
