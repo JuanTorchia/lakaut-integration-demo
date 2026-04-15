@@ -74,8 +74,9 @@ export default function FirmarPage() {
 
       const blob = await res.blob();
       const disposition = res.headers.get("content-disposition") ?? "";
-      const match = /filename="?([^"]+)"?/i.exec(disposition);
-      const filename = match?.[1] ?? "documento_firmado.pdf";
+      const match = disposition.match(/filename="?([^"]+)"?/i);
+      const isZip = (res.headers.get("content-type") ?? "").includes("zip");
+      const filename = match?.[1] ?? (isZip ? "documentos_firmados.zip" : "documento_firmado.pdf");
       setSignState({ kind: "success", downloadUrl: URL.createObjectURL(blob), filename });
     } catch {
       setSignState({ kind: "error", message: "Error de red. Verificá tu conexión e intentá de nuevo." });
@@ -141,7 +142,7 @@ export default function FirmarPage() {
 
         {/* Archivo */}
         <div>
-          <label className="block text-xs font-medium text-slate-500 mb-2">Documento PDF</label>
+          <label className="block text-xs font-medium text-slate-500 mb-2">Documento PDF o ZIP</label>
           <label
             className={`flex flex-col items-center justify-center w-full px-6 py-8 border border-dashed rounded-xl cursor-pointer transition-all ${
               file ? "border-emerald-300 bg-emerald-50" : "border-slate-200 hover:border-blue-400 bg-slate-50"
@@ -149,7 +150,7 @@ export default function FirmarPage() {
           >
             <input
               type="file"
-              accept=".pdf"
+              accept=".pdf,.zip,application/pdf,application/zip"
               onChange={(e) => {
                 setFile(e.target.files?.[0] ?? null);
                 setSignState({ kind: "idle" });
@@ -157,9 +158,12 @@ export default function FirmarPage() {
               className="hidden"
             />
             <span className={`text-sm font-medium ${file ? "text-emerald-700" : "text-slate-500"}`}>
-              {file ? `✓ ${file.name}` : "Seleccioná un archivo PDF"}
+              {file ? `✓ ${file.name}` : "Seleccioná un PDF o un ZIP con varios PDFs"}
             </span>
           </label>
+          <p className="mt-2 text-xs text-slate-400">
+            Si subís un ZIP, se firman todos los PDFs adentro y recibís un ZIP con los firmados. Máx. 50 MB.
+          </p>
         </div>
 
         {/* PIN */}
@@ -179,18 +183,20 @@ export default function FirmarPage() {
           disabled={!file || !isReady || signState.kind === "loading"}
           className="w-full rounded-lg bg-blue-600 px-6 py-3 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 transition-colors active:scale-95"
         >
-          {signState.kind === "loading" ? "Firmando..." : "Firmar PDF"}
+          {signState.kind === "loading" ? "Firmando..." : "Firmar"}
         </button>
 
         {signState.kind === "success" && (
           <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 space-y-3">
-            <p className="text-sm font-medium text-emerald-800">✓ Documento firmado correctamente</p>
+            <p className="text-sm font-medium text-emerald-800">
+              ✓ {signState.filename.toLowerCase().endsWith(".zip") ? "Documentos firmados correctamente" : "Documento firmado correctamente"}
+            </p>
             <a
               href={signState.downloadUrl}
               download={signState.filename}
               className="flex items-center justify-center w-full rounded-lg bg-emerald-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 transition-colors"
             >
-              Descargar PDF firmado
+              {signState.filename.toLowerCase().endsWith(".zip") ? "Descargar ZIP firmado" : "Descargar PDF firmado"}
             </a>
             <p className="text-xs text-emerald-600 text-center">
               Si no inició la descarga automáticamente, usá este botón.
