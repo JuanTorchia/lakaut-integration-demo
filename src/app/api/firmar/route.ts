@@ -4,7 +4,7 @@ import type { NextRequest } from "next/server";
 const LAKAUT_URL = process.env.NEXT_PUBLIC_LAKAUT_URL ?? "https://web-preprod.lakautac.com.ar";
 
 export async function POST(req: NextRequest) {
-  const token = cookies().get("lakaut_token")?.value;
+  const token = (await cookies()).get("lakaut_token")?.value;
 
   if (!token) {
     return Response.json({ message: "No autorizado" }, { status: 401 });
@@ -19,8 +19,7 @@ export async function POST(req: NextRequest) {
   });
 
   if (res.status === 401) {
-    const cookieStore = cookies();
-    cookieStore.delete("lakaut_token");
+    (await cookies()).delete("lakaut_token");
     return Response.json({ message: "Sesión expirada" }, { status: 401 });
   }
 
