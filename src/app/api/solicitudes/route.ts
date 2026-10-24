@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 const LAKAUT_URL = process.env.NEXT_PUBLIC_LAKAUT_URL ?? "https://web-preprod.lakautac.com.ar";
 
 export async function GET() {
-  const token = cookies().get("lakaut_token")?.value;
+  const token = (await cookies()).get("lakaut_token")?.value;
 
   if (!token) {
     return Response.json({ error: "No autorizado" }, { status: 401 });
@@ -14,7 +14,7 @@ export async function GET() {
   });
 
   if (res.status === 401) {
-    cookies().delete("lakaut_token");
+    (await cookies()).delete("lakaut_token");
     return Response.json({ error: "Sesión expirada" }, { status: 401 });
   }
 

@@ -1,15 +1,16 @@
 import { headers } from "next/headers";
 
-function getAppUrl(): string {
+async function getAppUrl(): Promise<string> {
   if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL;
-  const host = headers().get("host") ?? "localhost:3000";
+  const host = (await headers()).get("host") ?? "localhost:3000";
   const proto = host.startsWith("localhost") ? "http" : "https";
   return `${proto}://${host}`;
 }
 
-export default function Home({ searchParams }: { searchParams: { error?: string } }) {
+export default async function Home({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+  const { error } = await searchParams;
   const lakautUrl = process.env.NEXT_PUBLIC_LAKAUT_URL ?? "https://web-preprod.lakautac.com.ar";
-  const appUrl = getAppUrl();
+  const appUrl = await getAppUrl();
   const callbackUrl = `${appUrl}/callback`;
   const bridgeUrl = `${lakautUrl}/bridge?callbackUrl=${encodeURIComponent(callbackUrl)}`;
 
@@ -24,9 +25,9 @@ export default function Home({ searchParams }: { searchParams: { error?: string 
         </p>
       </div>
 
-      {searchParams.error && (
+      {error && (
         <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {searchParams.error === "no_token"
+          {error === "no_token"
             ? "La autenticación no se completó. Intentá de nuevo."
             : "Sesión expirada. Volvé a autenticarte."}
         </div>
